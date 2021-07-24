@@ -8,13 +8,36 @@
 #https://www.youtube.com/watch?v=SIu2VL-RAXc&list=PLJ39kWiJXSixyRMcn3lrbv8xI8ZZoYNZU&index=6
 # https://www.youtube.com/watch?v=bEOiYF1a6Ak&list=PLJ39kWiJXSixyRMcn3lrbv8xI8ZZoYNZU&index=9
 
+
+
+import streamlit as st
+import altair as alt 
+from joblib import load
+
+#####
+from sklearn.model_selection import train_test_split, GridSearchCV
+# preprocesing 
+from sklearn.feature_extraction.text import TfidfVectorizer,CountVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.utils import class_weight
+
+from sklearn import metrics
+from sklearn.pipeline import Pipeline
+#from imblearn.over_sampling import SMOTE
+
+from sklearn.dummy import DummyClassifier
+
+from sklearn.metrics import classification_report, plot_roc_curve, plot_confusion_matrix, roc_curve
+from yellowbrick.classifier import ROCAUC
+######
+
 from sklearn.feature_extraction.text import CountVectorizer
 #from sklearn.feature_extraction.text import TfidfTransformer
 #from sklearn.feature_extraction.text import TfidfVectorizer
-
-import streamlit as st
-
-from joblib import load
 
 #load modal
 model_age = load("lr_age_model")
@@ -37,12 +60,15 @@ from PIL import Image
 
 # frequent
 import nltk
+from nltk.corpus import stopwords
+import string
 from nltk import FreqDist
 
 # display data
-df = pd.read_csv("data/clean_data.csv")
+df = pd.read_csv("data/clean_data.csv.gz")
 #df = pd.read_csv("eda_data.csv")
 df = df.sample(frac=0.2)
+df = df.dropna()
 
 #numeric_col = df.select_dtypes(['int32', 'int64', 'float32', 'float64']).columns.tolist()
 
@@ -105,7 +131,7 @@ def frequent(text, number = 30, figsize=(10,7)):
 def main():
     
     st.title("Text Analysis")
-    menu = ["Home", "EDA", "About"]
+    menu = ["Home", "EDA", "Classifier"]
     choice = st.sidebar.selectbox("Menu", menu)
     
     # Home
@@ -143,13 +169,23 @@ def main():
                 #st.write(raw_text)
                
                 st.success("Predict")
-                result = ['under 35' if prediction == 0 else 'over 35' for prediction in prediction]
+                result = ['Under 35' if prediction == 0 else 'Over 35' for prediction in prediction]
                 st.write(result[0])
+                st.write("Confidence: {}".format(np.max(prob)))
                 
             with column2:
                 st.success("Prediction Prob")
-                st.write(prob)
+                #st.write(prob)
                 
+                prob_df = pd.DataFrame(prob, columns = ["Under 35", "Over 35"])
+                #st.write(prob.T)
+                df_clean = prob_df.T.reset_index()
+                df_clean.columns = ["Age", "Probability"]
+                
+                fig = alt.Chart(df_clean).mark_bar().encode(x = "Age", y = "Probability", color = "Age")
+                st.altair_chart(fig, use_container_width = True)
+                
+              
                 
               
             
@@ -168,11 +204,19 @@ def main():
                 st.success("Predict")
                 result = ['single' if prediction == 0 else 'married' for prediction in prediction]
                 st.write(result[0])
+                st.write("Confidence: {}".format(np.max(prob)))
 
 
             with column2:
                 st.success("Prediction Prob")
-                st.write(prob)
+                #st.write(prob)
+                
+                prob_df = pd.DataFrame(prob, columns = ["Single", "Married"])
+                df_clean = prob_df.T.reset_index()
+                df_clean.columns = ["Status", "Probability"]
+                
+                fig = alt.Chart(df_clean).mark_bar().encode(x = "Status", y = "Probability", color = "Status")
+                st.altair_chart(fig, use_container_width = True)
 
         st.success("WordCloud And Frequent")
         
@@ -232,13 +276,29 @@ def main():
     # EDA
     
     elif choice == "EDA":
-        st.subheader("EDA")
-        st.title("EDA")
+        st.subheader("Exploratory Data Analysis")
+        
+        
+        
+         #search to use later
+        search = st.text_input("Search")
+        with st.beta_expander("results"):
+            retrieved_df = df[df["clean"].str.contains(search)]
+            #search_df = dataframe(retrieved_df) #[["Agegroup", "status", "clean"]])
+            
+            #st.sidebar.subheader("plot for specific word you search")
+        
+            # add select widget
+            selectbox_search = st.sidebar.selectbox(label = "plot for specific word you search", options = retrieved_df.columns)
+            fig, ax = plt.subplots()
+            g = sns.countplot(x = retrieved_df[selectbox_search], hue = "Agegroup", data= retrieved_df)
+            g.set_xticklabels(ax.get_xticklabels(),rotation = 45, fontsize = 12,  ha="right")
+            st.pyplot(fig)
         
        
         
         # create plot
-        st.sidebar.subheader("Create plot")
+        st.sidebar.subheader("Dataset Plot")
         
         # add select widget
         selectbox_1 = st.sidebar.selectbox(label = "Feature", options = df.columns)
@@ -259,7 +319,104 @@ def main():
         
     # About  
     else:
-        st.subheader("About")
+        st.subheader("Classifier")
+        st.write("""
+        # Explore different classifier
+        """)
+        stopwords_list = stopwords.words("english")
+        stopwords_list += list(string.punctuation)
+        
+        # age 
+        age_dict = {"18-35":0, "35+":1}
+        df["Agegroup"] = df["Agegroup"].map(age_dict)
+        df["Agegroup"].value_counts()
+        
+        y = df["Agegroup"]
+        X = df["clean"]
+        
+        # train split
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.3, random_state=42)
+
+        
+        #vectorizer
+        vectorizer =  TfidfVectorizer(stop_words = stopwords_list,
+                                      encoding='utf-8',decode_error='ignore',
+                                      max_features = 30000)
+        
+        X_train_tf = vectorizer.fit_transform(X_train) 
+        X_test_tf = vectorizer.transform(X_test)
+        
+        # class weight
+        class_weights = class_weight.compute_class_weight('balanced',np.unique(y_train),y_train)
+
+        weights_dict = dict(zip(np.unique(y_train), class_weights))
+        weights_dict
+
+        sample_weights = class_weight.compute_sample_weight(weights_dict, y_train)
+        
+        
+        # model evaluation
+        def model_cl(model,X_train, X_test):   
+            st.write("***********************************************")
+            st.write(f"Training score:  {round(model.score(X_train, y_train), 2)}")
+            st.write(f"Test score:  {round(model.score(X_test, y_test), 2)}")
+                #Test score:  {round(model.score(X_test, y_test),2)}")
+            st.write("\n")
+            #st.write("********************Cl REPORT****************")
+
+            #y_pred = model.predict(X_test)
+            #y_prob = model.predict_proba(X_test)
+            #st.write(metrics.classification_report(y_test, y_pred))
+
+            st.write("\n")
+            st.write("***********************************************")
+
+            fig, ax = plt.subplots(ncols=2,figsize=(12,5))
+            plot_confusion_matrix(model,X_test,
+                                  y_test, cmap='Blues',
+                                  xticks_rotation='vertical',
+                                  normalize='true',
+                                  display_labels=["18-35", "35+"],
+                                        ax= ax[0])
+            curve  = ROCAUC(model,encoder={0:"18-35", 
+                                           1:"35+"})
+
+            curve .fit(X_train, y_train)        
+            curve .score(X_test, y_test)        
+            curve .show()                
+            st.pyplot(fig)
+
+
+        
+        
+        
+        
+        
+        # create sidebar for classifier
+        classifier_name = st.sidebar.selectbox("Select Classifier", ("NB", "LR"))
+        
+        #classifier
+        def get_classifier(classifier_name):
+            if classifier_name=="NB":
+                nb= MultinomialNB()
+                nb.fit(X_train_tf, y_train, sample_weight=sample_weights)
+                model_cl(nb, X_train_tf, X_test_tf)
+            elif classifier_name=="LR":
+                lr= LogisticRegression()
+                lr.fit(X_train_tf, y_train, sample_weight=sample_weights)
+                model_cl(lr, X_train_tf, X_test_tf)
+                
+        
+        get_classifier(classifier_name)
+
+        
+        
+        
+        
+        
+        
+        
     
     
     
