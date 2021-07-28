@@ -66,9 +66,6 @@ I used word clouds to visualize the most frequent words used by people in the di
 <img src="Pictures/Cloud Old.png" width=70%>
 
 
-Looking at these word clouds there is a clear distinction in the most used words among the different age groups. While younger people tend to use the word Love often, older people use it much less frequently. Younger people also tend to frequently talk about work and use work-related words as well as words like cautious. On the other hand, older people do not use work-related words frequently and then to more frequently use words such as creative, exploring and playing. These choice of words and overall themes are likely a reflexion of the stage in a person's life as younger people have a tendency to be more worried about thei career paths than older people which have established their careers already.
-
-
 ### Single
 
 <img src="Pictures/Cloud Single.png" width=70%>
@@ -78,8 +75,6 @@ Looking at these word clouds there is a clear distinction in the most used words
 
 <img src="Pictures/Cloud Relationship.png" width=70%>
 
-
-On the contrary of what is observed with the different age groups, the different marital status groups do not seem to use the word love at different frequencies. Interstingly, work-related words seem to be less frequently used by people that are in relationships than by single people. 
 
 
 ## IV. Model
@@ -101,7 +96,7 @@ For the majority of the models I have decided to use the text samples that I had
 <img src="Pictures/Age Model_Confusion.png" width=75%>
 
 
-My final model to predict age groups from OKCupid data is a Logistic Regression Classifier using the clean version of the original data which is not lemmatized and still contains nonsense words. This model can accuratly predict 82% of the younger (18-35 years old) group, 80% of the older (35+) group and is overall 81% accurate.  This model seems to perform well as it is accurate and not super overfitted as seen by the fact that the training and test score are relatively close to each other (0.86 Testing Score and 0.81 Test Score). 
+My final model to predict age groups from OKCupid data is a Logistic Regression Classifier using the clean version of the original data which is not lemmatized and still contains nonsense words. This model can accuratly predict 84% of the younger (18-35 years old) group, 76% of the older (35+) group and is overall 82% accurate.  This model seems to perform well as it is accurate and not super overfitted as seen by the fact that the training and test score are relatively close to each other (0.88 Testing Score and 0.82 Test Score). 
 
 
 
@@ -116,7 +111,7 @@ My final model to predict age groups from OKCupid data is a Logistic Regression 
 <img src="Pictures/Status_Confusion.png" width=75%>
 
 
-My final model to predict relationship from OKCupid data is a Multinomial Naive Bayes Classifier using the lemmatized version of the data but still containing nonsense words. This model can accuratly predict 84% of single people, 51% of people in a relationship and has an overall accuracy of 83%. Looking at the performance metrics, the model seems to perform ok and is not very ofverfitted as the training and test scores are similar (0.85 Training Score and 0.83 test Score).
+My final model to predict relationship from OKCupid data is a Multinomial Naive Bayes Classifier using the lemmatized version of the data but still containing nonsense words. This model can accuratly predict 84% of single people, 48% of people in a relationship and has an overall accuracy of 83%. Looking at the performance metrics, the model seems to perform ok and is not very ofverfitted as the training and test scores are similar (0.86 Training Score and 0.83 test Score).
 
 
 
@@ -126,23 +121,23 @@ Using these models I have built a Dash app that predicts the age and relationshi
 
 ### For example if you are a wine lover...
 
-<img src="Pictures/Dash_Old.png" width=100%>
+<img src="Pictures/Dash_Old.png" width=90%>
 
 
-### But if you like partying...
+### Or if your favorite city is Paris...
 
 
-<img src="Pictures/Dash_Young.png" width=100%>
+<img src="Pictures/Dash_Young.png" width=90%>
 
 
 
 
-## VI. Conclusions   and Future Directions 
+## VI. Conclusions  and Future Directions 
 
 With the work that I have done so far with this project, I was able to answer the three questions that I put forward when I started the project and conclude the following:
 
 1) Are words used by people of distinct ages and relationship status different?
-This analysis clearly shows that people of different age groups do have certain preferences for words and topics that are easy to recognize with artificial intelligence. On the other hand, it is harder to have a clear distinction between relationship status simply by looking at the words used. It is important to note however that this dataset comes from a dating app and therefore it is very bias towards people that are single or reported themselves as single even if they arent. It will be important to conduct a similar analysis and modeling with a dataset that is not bias towards single people to generate better conclusions about vocabulary choices of single versus people in a relationship. 
+This analysis shows that people of different age groups do have certain preferences for words and topics that are easy to recognize with artificial intelligence. On the other hand, it is harder to have a clear distinction between relationship status simply by looking at the words used. It is important to note however that this dataset comes from a dating app and therefore it is very bias towards people that are single or reported themselves as single even if they arent. It will be important to conduct a similar analysis and modeling with a dataset that is not bias towards single people to generate better conclusions about vocabulary choices of single versus people in a relationship. 
 
 2) Can we predict age based on the way people speak/write?
 This project also shows that we can accuratly predict age groups based on written samples with machine learning models.
@@ -155,12 +150,4 @@ Similarly to the problem that I encountered with finding specifc word preference
 
 
 I started this project with the goal of developing a machine learning model that could be of use for advertisement agencies to screen their targets using written samples from social media (instagram comments, tweets etc). This model can be integrated within each advertising company's traditional platforms and implemented in an automatic way such that each individual is categorized onto a specific age group and/or relationship status thus helping to tailor what products should be advertised to a specific individual.
-
-
-
-
-
-
-
-
 
