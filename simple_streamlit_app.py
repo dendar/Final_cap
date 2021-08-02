@@ -60,6 +60,7 @@ from PIL import Image
 
 # frequent
 import nltk
+nltk.download('punkt')
 from nltk.corpus import stopwords
 import string
 from nltk import FreqDist
