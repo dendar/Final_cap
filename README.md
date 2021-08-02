@@ -3,7 +3,7 @@
 by Nadir Sarigul
 
 
-[Click to see App](https://share.streamlit.io/dendar/okcupid_nlp_capstone/simple_streamlit_app.py
+[Click to see App](https://share.streamlit.io/dendar/okcupid_nlp_capstone/simple_streamlit_app.py)
 
 
 ## I. Overview and Goals
